@@ -52,6 +52,7 @@ function App() {
     function Game() {
         const [history, setHistory] = useState([Array(9).fill(null)]);
         const [currentMove, setCurrentMove] = useState(0);
+        const [isAsc, setIsAsc] = useState(true); 
         const currentSquares = history[currentMove];
         const xIsNext = currentMove % 2 === 0;
 
@@ -66,6 +67,10 @@ function App() {
 
         function jumpTo(nextMove) {
             setCurrentMove(nextMove);
+        }
+
+        function handleShortMoves() { 
+            setIsAsc(!isAsc); 
         }
 
         const moves = history.map((square, move) => {
@@ -91,8 +96,12 @@ function App() {
                     />
                 </div>
                 <div className="game-info">
-                    <ol>{moves}</ol>
+                    <button
+                        onClick={handleShortMoves}
+                    > {'sort moves'} </button>
+                    <ol>{isAsc ? moves : [...moves].reverse()} </ol>
                 </div>
+
             </div>
         );
     }
