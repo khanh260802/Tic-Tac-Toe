@@ -9,7 +9,7 @@ function App() {
     }
 
     function Board({ xIsNext, squares, onPlay }) {
-        const handlerClick = (i) => {
+        const handleClick = (i) => {
             if (squares[i] || calculateWinner(squares)) return;
             const nextSquares = [...squares];
             nextSquares[i] = xIsNext ? "X" : "O";
@@ -21,81 +21,62 @@ function App() {
             ? `Winner: ${winner}`
             : `Next player: ${xIsNext ? "X" : "O"}`;
 
+        const squaresArr = squares.map((square, i) => {
+            return (
+                <Square 
+                    value={square} 
+                    onSquareClick={() => handleClick(i)} 
+                    key={i}
+                />
+            );
+        });
+
+        const boardRowArr = Array(3)
+            .fill(null)
+            .map((item, i) => {
+                return (
+                    <div className="board-row" key={'row-'+(i+1)}>
+                        {squaresArr.slice(i * 3, i * 3 + 3)}
+                    </div>
+                );
+            });
+
         return (
             <div>
                 <div className="status">{status}</div>
-                <div className="board-row">
-                    <Square
-                        value={squares[0]}
-                        onSquareClick={() => handlerClick(0)}
-                    />
-                    <Square
-                        value={squares[1]}
-                        onSquareClick={() => handlerClick(1)}
-                    />
-                    <Square
-                        value={squares[2]}
-                        onSquareClick={() => handlerClick(2)}
-                    />
-                </div>
-                <div className="board-row">
-                    <Square
-                        value={squares[3]}
-                        onSquareClick={() => handlerClick(3)}
-                    />
-                    <Square
-                        value={squares[4]}
-                        onSquareClick={() => handlerClick(4)}
-                    />
-                    <Square
-                        value={squares[5]}
-                        onSquareClick={() => handlerClick(5)}
-                    />
-                </div>
-                <div className="board-row">
-                    <Square
-                        value={squares[6]}
-                        onSquareClick={() => handlerClick(6)}
-                    />
-                    <Square
-                        value={squares[7]}
-                        onSquareClick={() => handlerClick(7)}
-                    />
-                    <Square
-                        value={squares[8]}
-                        onSquareClick={() => handlerClick(8)}
-                    />
-                </div>
+                {boardRowArr}
             </div>
         );
     }
 
     function Game() {
         const [history, setHistory] = useState([Array(9).fill(null)]);
-        const [currentMove, setCurrentMove] = useState(0); 
+        const [currentMove, setCurrentMove] = useState(0);
         const currentSquares = history[currentMove];
-        const xIsNext = currentMove % 2 === 0; 
+        const xIsNext = currentMove % 2 === 0;
 
         function handlePlay(nextSquares) {
-            const nextHistory = [...history.slice(0, currentMove+1), nextSquares];
+            const nextHistory = [
+                ...history.slice(0, currentMove + 1),
+                nextSquares,
+            ];
             setHistory(nextHistory);
-            setCurrentMove(nextHistory.length - 1); 
+            setCurrentMove(nextHistory.length - 1);
         }
 
         function jumpTo(nextMove) {
-            setCurrentMove(nextMove); 
+            setCurrentMove(nextMove);
         }
-    
+
         const moves = history.map((square, move) => {
-            console.log('hello world')
             let description;
             if (move === 0) description = "Start game";
+            else if (move === currentMove)
+                description = "You are at move #" + currentMove;
             else description = "Go to move #" + move;
             return (
                 <li key={move}>
-                    <button onClick={() => jumpTo(move)}>
-                        {description}
-                    </button>
+                    <button onClick={() => jumpTo(move)}>{description}</button>
                 </li>
             );
         });
