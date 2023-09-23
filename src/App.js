@@ -1,8 +1,14 @@
 import { useState } from "react";
 function App() {
-    function Square({ value, onSquareClick }) {
+    function Square({ value, onSquareClick, backgroundColor}) {
         return (
-            <button className="square" onClick={onSquareClick}>
+            <button 
+                className="square" 
+                onClick={onSquareClick}
+                style={{
+                    backgroundColor:backgroundColor
+                }}
+            >
                 {value}
             </button>
         );
@@ -10,16 +16,19 @@ function App() {
 
     function Board({ xIsNext, squares, onPlay }) {
         const handleClick = (i) => {
-            if (squares[i] || calculateWinner(squares)) return;
+            if (squares[i] || calculateWinner(squares)) 
+                return;
             const nextSquares = [...squares];
             nextSquares[i] = xIsNext ? "X" : "O";
-            onPlay(nextSquares);
+            onPlay(nextSquares, i);
         };
 
         const winner = calculateWinner(squares);
         let status = winner
-            ? `Winner: ${winner}`
+            ? `Winner: ${xIsNext ? "O" : "X"}`
             : `Next player: ${xIsNext ? "X" : "O"}`;
+        if( winner == 'draw' ) 
+            status = 'Draw !'
 
         const squaresArr = squares.map((square, i) => {
             return (
@@ -27,6 +36,7 @@ function App() {
                     value={square} 
                     onSquareClick={() => handleClick(i)} 
                     key={i}
+                    backgroundColor = {winner && winner.includes(i) && '#ffb900'}
                 />
             );
         });
@@ -53,14 +63,16 @@ function App() {
         const [history, setHistory] = useState([Array(9).fill(null)]);
         const [currentMove, setCurrentMove] = useState(0);
         const [isAsc, setIsAsc] = useState(true); 
+        const [locations, setLocations]  = useState([NaN]); 
         const currentSquares = history[currentMove];
         const xIsNext = currentMove % 2 === 0;
 
-        function handlePlay(nextSquares) {
+        function handlePlay(nextSquares, cellIndex) {
             const nextHistory = [
                 ...history.slice(0, currentMove + 1),
                 nextSquares,
             ];
+            setLocations([...locations.slice(0, currentMove+1), cellIndex])
             setHistory(nextHistory);
             setCurrentMove(nextHistory.length - 1);
         }
@@ -74,11 +86,14 @@ function App() {
         }
 
         const moves = history.map((square, move) => {
+            
             let description;
+            let stringLocation =  `(${parseInt(locations[move]/3)+1}, ${parseInt(locations[move]%3)+1})`; 
             if (move === 0) description = "Start game";
             else if (move === currentMove)
-                description = "You are at move #" + currentMove;
-            else description = "Go to move #" + move;
+                description = `You are at move #${currentMove} ` + stringLocation;
+            else description = `Go to move #${move} `+ stringLocation;
+            
             return (
                 <li key={move}>
                     <button onClick={() => jumpTo(move)}>{description}</button>
@@ -120,6 +135,7 @@ function calculateWinner(squares) {
         [0, 4, 8],
         [2, 4, 6],
     ];
+    
     for (let i = 0; i < lines.length; i++) {
         const [a, b, c] = lines[i];
         if (
@@ -127,9 +143,13 @@ function calculateWinner(squares) {
             squares[a] === squares[b] &&
             squares[a] === squares[c]
         ) {
-            return squares[a];
+            return lines[i];
         }
     }
+    var isDraw = squares.every((ele) => ele)
+    if(isDraw) 
+        return 'draw'; 
+
     return null;
 }
 
