@@ -8,15 +8,12 @@ function App() {
         );
     }
 
-    function Board() {
-        const [squares, setSqueres] = useState(Array(9).fill(null));
-        const [xIsNext, setXIsNext] = useState(true);
+    function Board({ xIsNext, squares, onPlay }) {
         const handlerClick = (i) => {
             if (squares[i] || calculateWinner(squares)) return;
             const nextSquares = [...squares];
             nextSquares[i] = xIsNext ? "X" : "O";
-            setSqueres(nextSquares);
-            setXIsNext(!xIsNext);
+            onPlay(nextSquares);
         };
 
         const winner = calculateWinner(squares);
@@ -73,7 +70,53 @@ function App() {
         );
     }
 
-    return <Board />;
+    function Game() {
+        const [history, setHistory] = useState([Array(9).fill(null)]);
+        const [currentMove, setCurrentMove] = useState(0); 
+        const currentSquares = history[currentMove];
+        const xIsNext = currentMove % 2 === 0; 
+
+        function handlePlay(nextSquares) {
+            const nextHistory = [...history.slice(0, currentMove+1), nextSquares];
+            setHistory(nextHistory);
+            setCurrentMove(nextHistory.length - 1); 
+        }
+
+        function jumpTo(nextMove) {
+            setCurrentMove(nextMove); 
+        }
+    
+        const moves = history.map((square, move) => {
+            console.log('hello world')
+            let description;
+            if (move === 0) description = "Start game";
+            else description = "Go to move #" + move;
+            return (
+                <li key={move}>
+                    <button onClick={() => jumpTo(move)}>
+                        {description}
+                    </button>
+                </li>
+            );
+        });
+
+        return (
+            <div className="game">
+                <div className="game-board">
+                    <Board
+                        xIsNext={xIsNext}
+                        squares={currentSquares}
+                        onPlay={handlePlay}
+                    />
+                </div>
+                <div className="game-info">
+                    <ol>{moves}</ol>
+                </div>
+            </div>
+        );
+    }
+
+    return <Game />;
 }
 
 function calculateWinner(squares) {
